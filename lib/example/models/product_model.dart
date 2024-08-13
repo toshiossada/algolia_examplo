@@ -8,12 +8,16 @@ class SearchModel {
     required this.pageKey,
     required this.nextPageKey,
     required this.nbHits,
+    required this.minPrice,
+    required this.maxPrice,
   });
 
   final List<ProductModel> items;
   final int pageKey;
   final int? nextPageKey;
   final int nbHits;
+  final double minPrice;
+  final double maxPrice;
 
   factory SearchModel.fromResponse(SearchResponse response) {
     final items = response.hits.map(ProductModel.fromJson).toList();
@@ -21,20 +25,32 @@ class SearchModel {
     final nextPageKey = isLastPage ? null : response.page + 1;
     final nbHits = response.nbHits;
 
+    final maxPrice = double.tryParse(
+            response.facetsStats['offer.price']?['max']?.toString() ?? '') ??
+        double.infinity;
+    final minPrice = double.tryParse(
+            response.facetsStats['offer.price']?['min']?.toString() ?? '') ??
+        0.0;
+
     return SearchModel(
       items: items,
       pageKey: response.page,
       nextPageKey: nextPageKey,
       nbHits: nbHits,
+      minPrice: minPrice,
+      maxPrice: maxPrice,
     );
   }
 
   toEntity() {
     return SearchEntity(
-        items: items.map<ProductEntity>((item) => item.toEntity()).toList(),
-        pageKey: pageKey,
-        nextPageKey: nextPageKey,
-        nbHits: nbHits);
+      items: items.map<ProductEntity>((item) => item.toEntity()).toList(),
+      pageKey: pageKey,
+      nextPageKey: nextPageKey,
+      nbHits: nbHits,
+      minPrice: minPrice,
+      maxPrice: maxPrice,
+    );
   }
 }
 
@@ -48,8 +64,8 @@ class ProductModel {
   final String sellerImage;
   final String permalink;
   final int discount;
-  final double? precoDeTexto;
-  final double precoPorTexto;
+  final double? priceFromText;
+  final double priceToText;
   final List<TagModel> tags;
   final bool sobEncomenda;
 
@@ -63,8 +79,8 @@ class ProductModel {
     required this.sellerImage,
     required this.permalink,
     required this.discount,
-    required this.precoDeTexto,
-    required this.precoPorTexto,
+    required this.priceFromText,
+    required this.priceToText,
     required this.tags,
     required this.sobEncomenda,
   });
@@ -77,10 +93,10 @@ class ProductModel {
         imageUrl: json['thumbnail'],
         brand: json['manufacturer'],
         sellerName: json['offer']['seller'],
-        precoDeTexto: json['offer']?['originalPrice'] == null
+        priceFromText: json['offer']?['originalPrice'] == null
             ? null
             : json['offer']['originalPrice'] * 1.0,
-        precoPorTexto: json['offer']['price'] * 1.0,
+        priceToText: json['offer']['price'] * 1.0,
         skuSeller: json['offer']['sellerSkuId'],
         sellerImage: '',
         permalink: '',
@@ -114,8 +130,8 @@ class ProductModel {
         sellerImage: sellerImage,
         permalink: permalink,
         discount: discount,
-        precoDeTexto: precoDeTexto,
-        precoPorTexto: precoPorTexto,
+        priceFromText: priceFromText,
+        priceToText: priceToText,
         tags: tags.map<TagEntity>((e) => e.toEntity()).toList(),
         sobEncomenda: sobEncomenda,
       );

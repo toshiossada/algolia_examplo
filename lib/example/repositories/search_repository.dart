@@ -29,7 +29,7 @@ class SearchRepository {
 
   void initialFilter() => datasource.initialFilter();
 
-  filter({
+  void filter({
     required FiltersEntity filters,
   }) {
     datasource.filter(filters: FiltersModel.fromEntity(filters));

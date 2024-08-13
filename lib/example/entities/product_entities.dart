@@ -1,14 +1,19 @@
 class SearchEntity {
-  const SearchEntity(
-      {required this.items,
-      required this.pageKey,
-      required this.nextPageKey,
-      required this.nbHits});
+  const SearchEntity({
+    required this.items,
+    required this.pageKey,
+    required this.nextPageKey,
+    required this.nbHits,
+    required this.minPrice,
+    required this.maxPrice,
+  });
 
   final List<ProductEntity> items;
   final int pageKey;
   final int? nextPageKey;
   final int nbHits;
+  final double minPrice;
+  final double maxPrice;
 }
 
 class ProductEntity {
@@ -21,8 +26,8 @@ class ProductEntity {
   final String sellerImage;
   final String permalink;
   final int discount;
-  final double? precoDeTexto;
-  final double precoPorTexto;
+  final double? priceFromText;
+  final double priceToText;
   final List<TagEntity> tags;
   final bool sobEncomenda;
 
@@ -36,8 +41,8 @@ class ProductEntity {
     required this.sellerImage,
     required this.permalink,
     required this.discount,
-    required this.precoDeTexto,
-    required this.precoPorTexto,
+    required this.priceFromText,
+    required this.priceToText,
     required this.tags,
     required this.sobEncomenda,
   });

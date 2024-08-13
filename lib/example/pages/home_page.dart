@@ -4,6 +4,7 @@ import 'package:playground/example/entities/product_entities.dart';
 
 import 'home_controller.dart';
 import 'widgets/filter_widget.dart';
+import 'widgets/price_filter_widget.dart';
 
 class MyHomePage extends StatefulWidget {
   final HomeController controller;
@@ -20,11 +21,8 @@ class _MyHomePageState extends State<MyHomePage> {
   late final _categoryFacet = controller.buildFacetList('cat_lv'); //Categoria
   late final _sellerFacet =
       controller.buildFacetList('offer.seller'); //Vendido por
-
-  late final _manufacturerFacet =
-      controller.buildFacetList('manufacturer'); // Fabricante
-  late final _brandFacet = controller.buildFacetList('brand'); // Marcas
-  //Range de preços
+  late final _producer = controller.buildFacetList('producer'); // Fabricante
+  late final _brandFacet = controller.buildFacetList('manufacturer'); // Marcas
 
   @override
   void initState() {
@@ -118,14 +116,23 @@ class _MyHomePageState extends State<MyHomePage> {
                 Text('name: ${item.name}'),
                 Text('brand: ${item.brand}'),
                 Text('sellerName: ${item.sellerName}'),
-                Text('precoDeTexto: ${item.precoDeTexto}'),
-                Text('precoPorTexto: ${item.precoPorTexto}'),
+                Text('precoDeTexto: ${item.priceFromText}'),
+                Text('precoPorTexto: ${item.priceToText}'),
                 Text('skuSeller: ${item.skuSeller}'),
               ],
             ),
           ),
         ),
       );
+  void onChangePriceRange(RangeValues values) {
+    setState(() {
+      controller.onChangePriceRange(values);
+    });
+  }
+
+  void onFilterApplies() {
+    controller.applyFilter();
+  }
 
   Widget _filters(BuildContext context) => Scaffold(
       appBar: AppBar(
@@ -138,16 +145,39 @@ class _MyHomePageState extends State<MyHomePage> {
             FilterWidet(
               facetsList: _categoryFacet,
               title: 'Categorias',
+              onChanged: onFilterApplies,
             ),
             FilterWidet(
               facetsList: _sellerFacet,
               title: 'Vendido por',
+              onChanged: onFilterApplies,
             ),
-            ElevatedButton.icon(
-              onPressed: () {
-                controller.clearFilter();
-              },
-              label: const Icon(Icons.clear_all),
+            FilterWidet(
+              facetsList: _brandFacet,
+              title: 'Marcas',
+              onChanged: onFilterApplies,
+            ),
+            ValueListenableBuilder(
+                valueListenable: controller.priceRangeSelectedNotifier,
+                builder: (context, item, _) {
+                  return PriceFilterWidet(
+                    title: 'Preço',
+                    onChanged: onChangePriceRange,
+                    minPrice: item?.start,
+                    maxPrice: item?.end,
+                    priceBoundRanges: controller.priceBoundRangeValueNotifier,
+                  );
+                }),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+              children: [
+                ElevatedButton.icon(
+                  onPressed: () {
+                    controller.clearFilter();
+                  },
+                  label: const Icon(Icons.clear_all),
+                ),
+              ],
             )
           ],
         ),
@@ -160,7 +190,7 @@ class _MyHomePageState extends State<MyHomePage> {
     _sellerFacet.dispose();
     _categoryFacet.dispose();
     _brandFacet.dispose();
-    _manufacturerFacet.dispose();
+    _producer.dispose();
     super.dispose();
   }
 }

@@ -32,6 +32,10 @@ class SearchDatasource {
 
     filterState.add(const FilterGroupID('available_stock'),
         [Filter.facet('available_stock', 'true')]);
+    // filterState.add(const FilterGroupID('in_collection_slug'),
+    //     [Filter.facet('in_collection_slug', 'true')]);
+
+    //slug
     filterState.add(
       const FilterGroupID(
           'offer.warehouses.metadata.sellerId', FilterOperator.or),
@@ -45,6 +49,7 @@ class SearchDatasource {
     searcher.applyState(
       (state) => state.copyWith(
         // indexName: '', // Ordenaçao
+        facets: ['*'],
         query: filters.term,
         page: filters.page,
       ),
@@ -60,9 +65,10 @@ class SearchDatasource {
 
     filterState.add(offer, [
       Filter.comparison('offer.price', NumericOperator.greaterOrEquals,
-          filters.priceStart ?? double.infinity),
-      Filter.comparison(
-          'offer.price', NumericOperator.lessOrEquals, filters.priceEnd ?? 0)
+          filters.priceStart ?? 0),
+      if (filters.priceEnd != null)
+        Filter.comparison(
+            'offer.price', NumericOperator.lessOrEquals, filters.priceEnd!)
     ]);
   }
 
@@ -70,8 +76,6 @@ class SearchDatasource {
     required String attribute,
     required FilterState filterState,
   }) {
-    //offer.finalPrice,¹ dep_lv, cat_lv e offer.seller
-
     return searcher.buildFacetList(
       filterState: filterState,
       attribute: attribute,

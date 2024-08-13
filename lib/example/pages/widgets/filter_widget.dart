@@ -4,10 +4,13 @@ import 'package:flutter/material.dart';
 class FilterWidet extends StatelessWidget {
   final FacetList facetsList;
   final String title;
+  final VoidCallback? onChanged;
+
   const FilterWidet({
     super.key,
     required this.facetsList,
     required this.title,
+    required this.onChanged,
   });
 
   @override
@@ -30,12 +33,13 @@ class FilterWidet extends StatelessWidget {
               itemBuilder: (_, index) {
                 final selectableFacet = selectableFacets[index];
                 return CheckboxListTile(
-                  value: selectableFacet.isSelected,
-                  title: Text(
-                      "${selectableFacet.item.value} (${selectableFacet.item.count})"),
-                  onChanged: (_) =>
-                      facetsList.toggle(selectableFacet.item.value),
-                );
+                    value: selectableFacet.isSelected,
+                    title: Text(
+                        "${selectableFacet.item.value} (${selectableFacet.item.count})"),
+                    onChanged: (_) {
+                      facetsList.toggle(selectableFacet.item.value);
+                      onChanged?.call();
+                    });
               },
             )
           ],
